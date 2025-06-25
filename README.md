@@ -1,0 +1,2 @@
+# kush
+FOr school project
