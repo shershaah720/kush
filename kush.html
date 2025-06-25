@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Find Kush 💖 – Fresh Script</title>
+  <style>
+    :root{
+      --pink:#ff4da6;
+      --light:#ffe9f6;
+      --dark:#29111f;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif;}
+    body{
+      height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:var(--light);color:var(--dark);overflow:hidden;text-align:center;
+    }
+    h1{margin-bottom:28px;font-size:clamp(1.6rem,3vw,2.2rem);}
+
+    /* --- GRID --- */
+    #grid{display:grid;grid-template-columns:repeat(3,120px);grid-gap:20px;}
+    .box{
+      width:120px;height:120px;border-radius:16px;background:var(--pink);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+      font-size:2rem;color:#fff;transition:transform .25s;user-select:none;position:relative;
+    }
+    .box:hover{transform:scale(1.06);}    
+    .box.correct{background:var(--pink);font-size:1.4rem;animation:pop .6s ease-out forwards;}
+
+    /* --- ANIMATIONS --- */
+    @keyframes shake{0%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}100%{transform:translateX(0);} }
+    @keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.25);}100%{transform:scale(1);} }
+
+    /* HEARTS */
+    .heart{
+      position:fixed;font-size:1.6rem;pointer-events:none;animation:floatUp 5s linear forwards;
+      opacity:0.85;
+    }
+    @keyframes floatUp{
+      0%{transform:translateY(0) scale(.8);opacity:1;}
+      100%{transform:translateY(-110vh) scale(1.4);opacity:0;}
+    }
+
+    /* MESSAGE & BUTTON */
+    #message{min-height:1.8em;margin-top:32px;font-size:1.35rem;}
+    #replay{margin-top:18px;padding:12px 26px;border:none;border-radius:50px;background:var(--pink);color:#fff;font-size:1rem;cursor:pointer;display:none;box-shadow:0 4px 10px rgba(0,0,0,.15);} 
+    #replay:hover{transform:translateY(-2px);}   
+  </style>
+</head>
+<body>
+  <h1>Madam G, can you find <span style="color:var(--pink)">Kush</span>? 😉</h1>
+  <div id="grid"></div>
+  <div id="message"></div>
+  <button id="replay">Play Again 🔄</button>
+
+  <script>
+    /* === CONFIG === */
+    const myName = 'Kush';
+    const otherNames = ['Rohan','Aman','Vikram','Arjun','Rahul'];
+    const wrongMsg = 'Try again Deeksha g, find me!';
+    const correctMsg = '💋 I love you, Madam G! 💖';
+    const revealTime = 1000; // ms to show wrong name before hiding & shuffle
+
+    /* === HELPERS === */
+    const shuffle = arr => {for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()* (i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;};
+    const grid = document.getElementById('grid');
+    const msg  = document.getElementById('message');
+    const btn  = document.getElementById('replay');
+
+    let boxes = [];
+
+    function init(){
+      boxes=[];grid.innerHTML='';msg.textContent='';btn.style.display='none';
+      const names = shuffle([myName,...otherNames]);
+      names.forEach(name=>grid.appendChild(createBox(name)));
+    }
+
+    function createBox(name){
+      const div=document.createElement('div');div.className='box';div.textContent='?';
+      div.dataset.name=name;div.addEventListener('click',onClick);boxes.push(div);return div;
+    }
+
+    function onClick(e){
+      const box=e.currentTarget;const chosen=box.dataset.name;
+      if(box.classList.contains('correct'))return; // ignore after solved
+      box.textContent=chosen;
+      if(chosen===myName){success(box);}else{fail(box);}    
+    }
+
+    function fail(box){
+      msg.textContent=wrongMsg;box.style.animation='shake .4s';
+      box.addEventListener('animationend',()=>{box.style.animation='';}, {once:true});
+      setTimeout(reshuffle, revealTime);
+    }
+
+    function reshuffle(){
+      const names=shuffle(boxes.map(b=>b.dataset.name));
+      boxes.forEach((b,i)=>{b.dataset.name=names[i];b.textContent='?';});
+    }
+
+    function success(box){
+      box.classList.add('correct');box.textContent=myName;
+      msg.innerHTML=correctMsg;btn.style.display='inline-block';
+      boxes.forEach(b=>b.removeEventListener('click',onClick));
+      launchHearts();
+    }
+
+    function launchHearts(){
+      for(let i=0;i<24;i++){
+        const heart=document.createElement('span');heart.className='heart';heart.textContent=Math.random()<0.6?'💖':'💋';
+        heart.style.left=Math.random()*100+'vw';heart.style.bottom='-40px';
+        heart.style.fontSize=(1+Math.random()*1.2)+'rem';
+        document.body.appendChild(heart);heart.addEventListener('animationend',()=>heart.remove());
+      }
+    }
+
+    btn.addEventListener('click',init);
+
+    init();
+  </script>
+</body>
+</html>
